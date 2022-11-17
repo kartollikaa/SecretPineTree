@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    tools:context=".MainActivity"
+    >
+
+  <Button
+      android:id="@+id/startMessagingService"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:enabled="false"
+      android:text="@string/start_messaging_service"
+      />
+
+  <Button
+      android:id="@+id/givePermissions"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/request_permissions"
+      />
+
+  <Button
+      android:id="@+id/sendMessage"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:enabled="false"
+    android:text="Отправить сообщение"/>
+
+</LinearLayout>
