@@ -15,3 +15,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = "SecretPineTreeClient"
 include ':app'
+include ':domain'
+include ':data'
