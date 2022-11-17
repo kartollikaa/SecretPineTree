@@ -67,6 +67,9 @@ class MainActivity : ComponentActivity() {
               },
               onSendClick = { message ->
                 viewModel.sendMessage(message)
+              },
+              onNameSaved = { name ->
+                viewModel.saveName(name)
               }
             )
           } else {

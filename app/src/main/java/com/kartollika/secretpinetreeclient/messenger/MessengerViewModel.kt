@@ -1,6 +1,9 @@
 package com.kartollika.secretpinetreeclient.messenger
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.nearby.connection.ConnectionInfo
@@ -17,9 +20,11 @@ import com.google.android.gms.nearby.connection.PayloadTransferUpdate
 import com.google.android.gms.nearby.connection.Strategy
 import com.kartollika.secretpinetreeclient.Message
 import com.kartollika.secretpinetreeclient.messenger.LookingForPine.Connected
+import com.kartollika.secretpinetreeclient.messenger.LookingForPine.Connecting
 import com.kartollika.secretpinetreeclient.messenger.MessagingUiState.Loading
 import com.kartollika.secretpinetreeclient.messenger.MessagingUiState.Messenger
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -39,6 +44,7 @@ class MessengerViewModel @Inject constructor(
 ) : ViewModel() {
 
   private var endpointId: String = ""
+  private var endpointName: String = ""
 
   private val _lookingForPineState = MutableStateFlow<LookingForPine>(LookingForPine.Loading)
   val lookingForPineState = _lookingForPineState.asStateFlow()
@@ -47,7 +53,7 @@ class MessengerViewModel @Inject constructor(
     messengerRepository.getName(),
     messengerRepository.getMessages(),
   ) { name, messages ->
-    MessagingUiState.Messenger(name, messages)
+    Messenger(name, messages, endpointName)
   }
     .stateIn(
       scope = viewModelScope,
@@ -80,10 +86,13 @@ class MessengerViewModel @Inject constructor(
   }
 
   fun connect(endpointId: String) {
-    connectionsClient
-      .requestConnection("Android Phone", endpointId, connectionLifecycleCallback)
-      .addOnSuccessListener { unused: Void? -> }
-      .addOnFailureListener { e: Exception? -> }
+    _lookingForPineState.tryEmit(Connecting)
+    viewModelScope.launch(Dispatchers.Default) {
+      connectionsClient
+        .requestConnection("Android Phone", endpointId, connectionLifecycleCallback)
+        .addOnSuccessListener { unused: Void? -> }
+        .addOnFailureListener { e: Exception? -> }
+    }
   }
 
   fun sendMessage(messageText: String) {
@@ -99,6 +108,7 @@ class MessengerViewModel @Inject constructor(
 
   private fun onEndpointFound(endpointId: String, discoveredEndpointName: String) {
     _lookingForPineState.tryEmit(LookingForPine.Found(endpointId, discoveredEndpointName))
+    endpointName = discoveredEndpointName
   }
 
   fun dismissConnectionDialog() {
@@ -110,9 +120,7 @@ class MessengerViewModel @Inject constructor(
       connectionsClient
         .acceptConnection(endpointId, object : PayloadCallback() {
           override fun onPayloadReceived(p0: String, payload: Payload) {
-            val messages = String(payload.asBytes()!!)
-            Log.d("NEARBY", "connection result $messages")
-            putMessagesLocal(messages)
+            putMessagesLocal(payload)
           }
 
           override fun onPayloadTransferUpdate(p0: String, p1: PayloadTransferUpdate) {
@@ -124,19 +132,25 @@ class MessengerViewModel @Inject constructor(
       Log.d("NEARBY", "connection result $result")
 
       if (result.status.statusCode == ConnectionsStatusCodes.STATUS_OK) {
-        _lookingForPineState.tryEmit(Connected)
+        _lookingForPineState.tryEmit(Connected(endpointName))
         endpointId = endpoint
       }
     }
 
     override fun onDisconnected(p0: String) {
+      _lookingForPineState.tryEmit(LookingForPine.Loading)
+      endpointId = ""
     }
   }
 
-  @OptIn(ExperimentalSerializationApi::class)
-  private fun putMessagesLocal(messages: String) {
-    val messages = Json.decodeFromString<List<Message>>(messages)
-    messengerRepository.putMessages(messages)
+  private fun putMessagesLocal(payload: Payload) {
+    viewModelScope.launch(Dispatchers.Default) {
+      val bytes = payload.asBytes() ?: return@launch
+      val messagesString = String(bytes)
+
+      val messages = Json.decodeFromString<List<Message>>(messagesString)
+      messengerRepository.putMessages(messages)
+    }
   }
 }
 
@@ -145,13 +159,14 @@ sealed class MessagingUiState {
 
   data class Messenger(
     val name: String,
-    val messages: List<Message>
+    val messages: List<Message>,
+    val serverName: String
   ) : MessagingUiState()
 }
 
 sealed class LookingForPine {
 
-  object Connected: LookingForPine()
+  data class Connected(val endpointName: String): LookingForPine()
 
   data class Found(
     val endpointId: String = "",
@@ -159,6 +174,7 @@ sealed class LookingForPine {
   ): LookingForPine()
 
   object Loading: LookingForPine()
+  object Connecting: LookingForPine()
 
   /*var shouldShowPineConnectDialog by mutableStateOf(false)
     private set

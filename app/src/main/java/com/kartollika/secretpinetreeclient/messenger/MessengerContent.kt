@@ -21,12 +21,17 @@ import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.ProvideTextStyle
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
@@ -41,10 +46,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.kartollika.secretpinetreeclient.Message
 import com.kartollika.secretpinetreeclient.messenger.LookingForPine.Connected
+import com.kartollika.secretpinetreeclient.messenger.LookingForPine.Connecting
 import com.kartollika.secretpinetreeclient.messenger.LookingForPine.Found
 import com.kartollika.secretpinetreeclient.messenger.MessagingUiState.Loading
 import com.kartollika.secretpinetreeclient.messenger.MessagingUiState.Messenger
@@ -58,7 +66,8 @@ import kotlinx.coroutines.launch
   stopDiscovery: () -> Unit,
   onConnectToEndpoint: (String) -> Unit,
   onDismissConnectionDialog: () -> Unit,
-  onSendClick: (String) -> Unit
+  onSendClick: (String) -> Unit,
+  onNameSaved: (String) -> Unit
 ) {
   if (lookingForPineState !is Connected) {
     LookingPine(
@@ -77,7 +86,7 @@ import kotlinx.coroutines.launch
         }
       }
       is Messenger -> {
-        MessengerContent(state, modifier, onSendClick)
+        MessengerContent(state, modifier, onSendClick, onNameSaved)
       }
     }
   }
@@ -92,22 +101,39 @@ import kotlinx.coroutines.launch
   onConnectToEndpoint: (String) -> Unit = {},
   onDismissConnectionDialog: () -> Unit = {}
 ) {
-  DisposableEffect(Unit) {
+  DisposableEffect(state) {
     if (state is LookingForPine.Loading) {
       startDiscovery()
     }
 
-    onDispose { stopDiscovery() }
+    onDispose {
+      stopDiscovery()
+    }
   }
 
   Column(
-    modifier = modifier,
+    modifier = modifier.padding(horizontal = 64.dp),
     verticalArrangement = Arrangement.Center,
     horizontalAlignment = Alignment.CenterHorizontally
   ) {
-    Text(text = "Ищем ближайшую сосну. Подойдите к ней")
-    Spacer(modifier = Modifier.height(16.dp))
-    CircularProgressIndicator()
+
+    ProvideTextStyle(value = LocalTextStyle.current.copy(textAlign = TextAlign.Center)) {
+      when (state) {
+        is Connecting -> {
+          CircularProgressIndicator()
+          Spacer(modifier = Modifier.height(8.dp))
+          Text(text = "Подключаемся...")
+        }
+
+        is LookingForPine.Loading, is Found -> {
+          CircularProgressIndicator()
+          Spacer(modifier = Modifier.height(16.dp))
+          Text(text = "Ищем ближайшую сосну. Подойдите к ней")
+        }
+        else -> {}
+      }
+    }
+
 
     if (state is Found) {
       PineConnectDialog(
@@ -127,7 +153,7 @@ import kotlinx.coroutines.launch
   AlertDialog(
     onDismissRequest = onDismiss,
     title = {
-      Text(text = "Нашли сосну ${state.discoveredEndpointName}!")
+      Text(text = "Нашли сосну \"${state.discoveredEndpointName}\"!")
     }, text = {
       Text(text = "Чтобы присоединиться к чату и начать общение около сосны, нажмите \"Подключиться\"")
     }, dismissButton = {
@@ -137,25 +163,85 @@ import kotlinx.coroutines.launch
     }, confirmButton = {
       TextButton(onClick = {
         onConfirm()
-        onDismiss()
       }) {
         Text(text = "Подключиться")
       }
-    })
+    }
+  )
 }
 
 @Composable fun MessengerContent(
   state: Messenger,
   modifier: Modifier,
-  onSendClick: (String) -> Unit
+  onSendClick: (String) -> Unit,
+  onNameSaved: (String) -> Unit
 ) {
   val scrollState = rememberLazyListState()
 
-  Column(modifier = modifier.imePadding()) {
-    Messages(state.messages, modifier = Modifier.weight(1f), scrollState = scrollState)
-    UserInput(
-      modifier = Modifier.fillMaxWidth(),
-      onSendClick = onSendClick
+  Scaffold(
+    modifier = Modifier
+      .fillMaxSize()
+      .imePadding(),
+    topBar = {
+      TopAppBar(
+        title = {
+          Text(text = state.serverName)
+        },
+      )
+    },
+  ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+      Column(modifier = modifier.fillMaxSize()) {
+        Messages(state.messages, modifier = Modifier.weight(1f), scrollState = scrollState)
+        UserInput(
+          modifier = Modifier.fillMaxWidth(),
+          onSendClick = onSendClick
+        )
+      }
+
+      IntroduceYourselfDialog(
+        state = state,
+        onNameSaved = onNameSaved
+      )
+    }
+  }
+}
+
+@Composable fun IntroduceYourselfDialog(
+  state: Messenger,
+  onNameSaved: (String) -> Unit = {},
+) {
+  if (state.name.isEmpty()) {
+    var nameInput by remember {
+      mutableStateOf(TextFieldValue(state.name))
+    }
+
+    AlertDialog(
+      shape = RoundedCornerShape(16.dp),
+      properties = DialogProperties(
+        dismissOnBackPress = false,
+        dismissOnClickOutside = false
+      ),
+      title = {
+        Text(text = "Как вас звать?")
+      },
+      onDismissRequest = {
+      },
+      text = {
+        OutlinedTextField(value = nameInput, onValueChange = {
+          nameInput = it
+        })
+      },
+      confirmButton = {
+        TextButton(
+          enabled = nameInput.text.isNotEmpty(),
+          onClick = {
+            onNameSaved(nameInput.text)
+          }
+        ) {
+          Text(text = "Сохранить")
+        }
+      },
     )
   }
 }
