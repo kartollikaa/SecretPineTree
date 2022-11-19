@@ -1,5 +1,6 @@
 package com.kartollika.secretpinetree.client.messenger
 
+import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,7 +50,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -65,6 +68,7 @@ import com.kartollika.secretpinetree.client.messenger.MessagingUiState.Messenger
 import com.kartollika.secretpinetree.client.messenger.vo.MessageVO
 import com.kartollika.secretpinetree.client.ui_kit.theme.BlueGrey30
 import com.kartollika.secretpinetree.client.ui_kit.theme.BlueGrey90
+import com.kartollika.secretpinetree.client.ui_kit.theme.SecretPineTreeClientTheme
 import kotlinx.coroutines.launch
 
 @Composable fun MessengerScreen(
@@ -318,13 +322,15 @@ import kotlinx.coroutines.launch
       onValueChange = { onTextChanged(it) },
       maxLines = 1,
       singleLine = true,
+      textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
+      cursorBrush = SolidColor(LocalContentColor.current)
     )
 
     if (textState.text.isEmpty() && !lastFocusState) {
       Text(
         text = "Write message here",
         style = MaterialTheme.typography.body1.copy(
-          color = LocalContentColor.current.copy(alpha = 0.3f)
+          color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
         )
       )
     }
@@ -502,9 +508,12 @@ private fun MessageBubble(
 }
 
 @Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun UserInputPreview() {
-  UserInput()
+  SecretPineTreeClientTheme {
+    UserInput()
+  }
 }
 
 private val JumpToBottomThreshold = 56.dp
