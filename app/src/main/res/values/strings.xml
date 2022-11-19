@@ -2,4 +2,6 @@
   <string name="app_name">SecretPineTreeClient</string>
   <string name="start_messaging_service">Запустить сервис сообщений</string>
   <string name="title_activity_main2">MainActivity2</string>
+  <string name="permissions_rationale">Для общения около сосны необходимо предоставить несколько разрешений</string>
+  <string name="permissions_rationale_give_permissions">Дать разрешения</string>
 </resources>

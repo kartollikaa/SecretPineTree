@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="write_message_here">Давай напишем туристам?</string>
+  <string name="connecting">Подключаемся…</string>
+  <string name="pine_search_in_progress">Ищем ближайшую сосну. Подойдите к ней</string>
+  <string name="press_connect_to_start_chatting">Чтобы присоединиться к чату и начать общение около сосны, нажмите \"Подключиться\"</string>
+  <string name="pine_found">Нашли сосну \"%s\"!</string>
+  <string name="cancel">Отмена</string>
+  <string name="connect">Подключиться</string>
+  <string name="ask_your_name">Как вас звать?</string>
+  <string name="save">Сохранить</string>
+  <string name="send_message">Отправить</string>
+  <string name="load_more">Загрузить еще</string>
+</resources>

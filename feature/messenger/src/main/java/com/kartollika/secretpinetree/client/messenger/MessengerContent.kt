@@ -50,10 +50,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -65,6 +65,7 @@ import com.kartollika.secretpinetree.client.messenger.LookingForPine.Connecting
 import com.kartollika.secretpinetree.client.messenger.LookingForPine.Found
 import com.kartollika.secretpinetree.client.messenger.MessagingUiState.Loading
 import com.kartollika.secretpinetree.client.messenger.MessagingUiState.Messenger
+import com.kartollika.secretpinetree.client.messenger.R.string
 import com.kartollika.secretpinetree.client.messenger.vo.MessageVO
 import com.kartollika.secretpinetree.client.ui_kit.theme.BlueGrey30
 import com.kartollika.secretpinetree.client.ui_kit.theme.BlueGrey90
@@ -138,13 +139,13 @@ import kotlinx.coroutines.launch
         is Connecting -> {
           CircularProgressIndicator()
           Spacer(modifier = Modifier.height(8.dp))
-          Text(text = "Подключаемся...")
+          Text(text = stringResource(string.connecting))
         }
 
         is LookingForPine.Loading, is Found -> {
           CircularProgressIndicator()
           Spacer(modifier = Modifier.height(16.dp))
-          Text(text = "Ищем ближайшую сосну. Подойдите к ней")
+          Text(text = stringResource(string.pine_search_in_progress))
         }
         else -> {}
       }
@@ -163,18 +164,18 @@ import kotlinx.coroutines.launch
   state: Found, onDismiss: () -> Unit, onConfirm: () -> Unit
 ) {
   AlertDialog(onDismissRequest = onDismiss, title = {
-    Text(text = "Нашли сосну \"${state.discoveredEndpointName}\"!")
+    Text(text = stringResource(id = string.pine_found, state.discoveredEndpointName))
   }, text = {
-    Text(text = "Чтобы присоединиться к чату и начать общение около сосны, нажмите \"Подключиться\"")
+    Text(text = stringResource(id = string.press_connect_to_start_chatting))
   }, dismissButton = {
     TextButton(onClick = onDismiss) {
-      Text(text = "Отмена")
+      Text(text = stringResource(string.cancel))
     }
   }, confirmButton = {
     TextButton(onClick = {
       onConfirm()
     }) {
-      Text(text = "Подключиться")
+      Text(text = stringResource(string.connect))
     }
   })
 }
@@ -249,7 +250,7 @@ import kotlinx.coroutines.launch
         dismissOnBackPress = false, dismissOnClickOutside = false
       ),
       title = {
-        Text(text = "Как вас звать?")
+        Text(text = stringResource(string.ask_your_name))
       },
       onDismissRequest = {},
       text = {
@@ -261,7 +262,7 @@ import kotlinx.coroutines.launch
         TextButton(enabled = nameInput.text.isNotEmpty(), onClick = {
           onNameSaved(nameInput.text)
         }) {
-          Text(text = "Сохранить")
+          Text(text = stringResource(string.save))
         }
       },
     )
@@ -328,7 +329,7 @@ import kotlinx.coroutines.launch
 
     if (textState.text.isEmpty() && !lastFocusState) {
       Text(
-        text = "Write message here",
+        text = stringResource(string.write_message_here),
         style = MaterialTheme.typography.body1.copy(
           color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
         )
@@ -363,7 +364,7 @@ import kotlinx.coroutines.launch
       onSendClick(textState.text)
     }) {
     Text(
-      "Send", modifier = Modifier.padding(horizontal = 16.dp)
+      stringResource(string.send_message), modifier = Modifier.padding(horizontal = 16.dp)
     )
   }
 }
@@ -440,7 +441,7 @@ import kotlinx.coroutines.launch
       onClick = onLoadMore,
       shape = RoundedCornerShape(16.dp),
     ) {
-      Text(text = "Загрузить еще")
+      Text(text = stringResource(string.load_more))
     }
   }
 }
