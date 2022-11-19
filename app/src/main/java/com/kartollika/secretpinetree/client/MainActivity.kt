@@ -6,21 +6,32 @@ import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.material.primarySurface
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.kartollika.secretpinetree.client.messenger.MessengerScreen
 import com.kartollika.secretpinetree.client.messenger.MessengerViewModel
-import com.kartollika.secretpinetree.client.theme.SecretPineTreeClientTheme
+import com.kartollika.secretpinetree.client.permission.PermissionRationale
+import com.kartollika.secretpinetree.client.ui_kit.theme.SecretPineTreeClientTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -35,11 +46,19 @@ class MainActivity : ComponentActivity() {
     setContent {
       SecretPineTreeClientTheme {
 
+        val systemUiController = rememberSystemUiController()
+        val useDarkIcons = !isSystemInDarkTheme()
+        DisposableEffect(systemUiController, useDarkIcons) {
+          // Update all of the system bar colors to be transparent, and use
+          // dark icons if we're in light theme
+          systemUiController.setSystemBarsColor(darkIcons = useDarkIcons, color = Color.Transparent)
+
+          onDispose {
+          }
+        }
+
         Surface(
-          modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .navigationBarsPadding(),
+          modifier = Modifier.fillMaxSize(),
           color = MaterialTheme.colors.background
         ) {
           val permissionsLauncher =
@@ -51,6 +70,7 @@ class MainActivity : ComponentActivity() {
             val lookingForPineState by viewModel.lookingForPineState.collectAsState()
 
             MessengerScreen(
+              modifier = Modifier.statusBarsPadding(),
               state = state,
               lookingForPineState = lookingForPineState,
               startDiscovery = {

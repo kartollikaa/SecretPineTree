@@ -1,6 +1,6 @@
 package com.kartollika.secretpinetree.client.data.di
 
-import com.kartollika.secretpinetree.client.data.MessengerRepositoryImpl
+import com.kartollika.secretpinetree.client.data.repository.MessengerRepositoryImpl
 import com.kartollika.secretpinetree.client.domain.repository.MessengerRepository
 import dagger.Binds
 import dagger.Module

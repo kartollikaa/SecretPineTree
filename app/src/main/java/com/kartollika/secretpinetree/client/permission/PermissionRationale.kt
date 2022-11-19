@@ -1,4 +1,4 @@
-package com.kartollika.secretpinetree.client
+package com.kartollika.secretpinetree.client.permission
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

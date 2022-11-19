@@ -17,3 +17,5 @@ rootProject.name = "SecretPineTreeClient"
 include ':app'
 include ':domain'
 include ':data'
+include ':feature:messenger'
+include ':ui-kit'

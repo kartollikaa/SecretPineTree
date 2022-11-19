@@ -15,7 +15,7 @@ import javax.inject.Named
 @InstallIn(SingletonComponent::class)
 class DataStoreModule {
 
-  @Named(USER_PREFERENCES_DATASTORE)
+  @UserPreferences
   @Provides
   fun provideUserDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
     return context.userPreferenceDataStore
