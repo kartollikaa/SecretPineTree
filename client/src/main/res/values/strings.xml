@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="permissions_rationale">Для общения около сосны необходимо предоставить несколько разрешений</string>
+  <string name="permissions_rationale_give_permissions">Дать разрешения</string>
+</resources>

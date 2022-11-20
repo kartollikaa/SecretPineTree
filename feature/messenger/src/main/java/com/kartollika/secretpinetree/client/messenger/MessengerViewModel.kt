@@ -21,11 +21,11 @@ import com.google.android.gms.nearby.connection.PayloadTransferUpdate
 import com.google.android.gms.nearby.connection.Strategy
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.kartollika.secretpinetree.client.domain.datasource.LocationDataSource
-import com.kartollika.secretpinetree.client.domain.model.ClientRequest
-import com.kartollika.secretpinetree.client.domain.model.ClientRequest.SendMessage
-import com.kartollika.secretpinetree.client.domain.model.Message
-import com.kartollika.secretpinetree.client.domain.repository.MessengerRepository
+import com.kartollika.secretpinetree.domain.datasource.LocationDataSource
+import com.kartollika.secretpinetree.domain.model.ClientRequest
+import com.kartollika.secretpinetree.domain.model.ClientRequest.SendMessage
+import com.kartollika.secretpinetree.domain.model.Message
+import com.kartollika.secretpinetree.domain.repository.MessengerRepository
 import com.kartollika.secretpinetree.client.messenger.LookingForPine.Connected
 import com.kartollika.secretpinetree.client.messenger.LookingForPine.Connecting
 import com.kartollika.secretpinetree.client.messenger.LookingForPine.Found
@@ -188,6 +188,15 @@ class MessengerViewModel @Inject constructor(
       val payload = Payload.fromBytes(gson.toJson(request).toByteArray())
       connectionsClient.sendPayload(endpointId, payload)
     }
+  }
+
+  fun disconnect() {
+    connectionsClient.stopAllEndpoints()
+  }
+
+  override fun onCleared() {
+    super.onCleared()
+    disconnect()
   }
 }
 

@@ -1,6 +1,6 @@
 package com.kartollika.secretpinetree.client.messenger.vo
 
-import com.kartollika.secretpinetree.client.domain.model.Message
+import com.kartollika.secretpinetree.domain.model.Message
 
 class MessageVOMapper {
   fun mapMessageToVO(message: Message) = MessageVO(

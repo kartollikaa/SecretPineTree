@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">SecretPineTreeServer</string>
+  <string name="request_permissions">Дать разрешения</string>
+  <string name="start_server">Запустить сервер</string>
+  <string name="stop_server">Выключить сервер</string>
+</resources>

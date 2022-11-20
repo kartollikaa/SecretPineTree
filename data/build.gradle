@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-  namespace 'com.kartollika.secretpinetree.client.data'
+  namespace 'com.kartollika.secretpinetree.data'
   compileSdk 32
 
   defaultConfig {
