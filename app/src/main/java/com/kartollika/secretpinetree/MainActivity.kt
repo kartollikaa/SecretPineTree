@@ -35,10 +35,8 @@ import com.google.android.gms.nearby.connection.Strategy
 import com.kartollika.secretpinetree.client.ClientActivity
 import com.kartollika.secretpinetree.databinding.ActivityMainBinding
 import com.kartollika.secretpinetree.server.MainActivityViewModel
-import com.kartollika.secretpinetree.server.repository.MessagesRepository
 import com.permissionx.guolindev.PermissionX
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -99,10 +97,13 @@ class MainActivity : AppCompatActivity() {
   }
 
   private fun enableBluetooth(action: () -> Unit) {
-    val bluetoothAdapter: BluetoothAdapter = (getSystemService(BLUETOOTH_SERVICE) as BluetoothManager).adapter
+    val bluetoothAdapter: BluetoothAdapter =
+      (getSystemService(BLUETOOTH_SERVICE) as BluetoothManager).adapter
     if (!bluetoothAdapter.isEnabled) {
       pendingAction = action
-      bluetoothEnableLauncher.launch(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE))
+      bluetoothEnableLauncher.launch(Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
+        putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 6000)
+      })
       return
     }
     action()
