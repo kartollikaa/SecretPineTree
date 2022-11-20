@@ -104,7 +104,6 @@ class MessengerViewModel @Inject constructor(
   }
 
   fun connect(endpointId: String) {
-    val endpointName = endpointName
     _lookingForPineState.tryEmit(Connecting)
     viewModelScope.launch(Dispatchers.Default) {
       connectionsClient
