@@ -60,5 +60,5 @@ dependencies {
   implementation "com.google.accompanist:accompanist-systemuicontroller:0.27.1"
 
   implementation project(":domain")
-  implementation project(":ui-kit")
+  implementation project(":client:ui-kit")
 }

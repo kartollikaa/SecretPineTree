@@ -62,6 +62,6 @@ dependencies {
 
   implementation project(":domain")
   implementation project(":data")
-  implementation project(":feature:messenger")
-  implementation project(":ui-kit")
+  implementation project(":client:feature:messenger")
+  implementation project(":client:ui-kit")
 }
