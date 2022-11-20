@@ -1,5 +1,6 @@
 package com.kartollika.secretpinetree.client.messenger
 
+import android.location.LocationManager
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,6 +18,7 @@ import com.google.android.gms.nearby.connection.PayloadTransferUpdate
 import com.google.android.gms.nearby.connection.Strategy
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.kartollika.secretpinetree.client.domain.datasource.LocationDataSource
 import com.kartollika.secretpinetree.client.domain.model.ClientRequest
 import com.kartollika.secretpinetree.client.domain.model.ClientRequest.SendMessage
 import com.kartollika.secretpinetree.client.domain.model.Message
@@ -44,7 +46,8 @@ class MessengerViewModel @Inject constructor(
   private val messengerRepository: MessengerRepository,
   private val connectionsClient: ConnectionsClient,
   private val messageVOMapper: MessageVOMapper,
-  private val gson: Gson
+  private val gson: Gson,
+  private val locationDataSource: LocationDataSource
 ) : ViewModel() {
 
   private var endpointId: String = ""
@@ -64,6 +67,8 @@ class MessengerViewModel @Inject constructor(
       started = SharingStarted.WhileSubscribed(),
       initialValue = Loading
     )
+
+  fun locationEnabled() = locationDataSource.isLocationEnabled()
 
   fun saveName(name: String) {
     viewModelScope.launch {

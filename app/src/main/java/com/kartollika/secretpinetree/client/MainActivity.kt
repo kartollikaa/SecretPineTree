@@ -1,26 +1,18 @@
 package com.kartollika.secretpinetree.client
 
-import android.Manifest.permission
-import android.os.Build.VERSION
-import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.material.primarySurface
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
@@ -31,6 +23,7 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.kartollika.secretpinetree.client.messenger.MessengerScreen
 import com.kartollika.secretpinetree.client.messenger.MessengerViewModel
 import com.kartollika.secretpinetree.client.permission.PermissionRationale
+import com.kartollika.secretpinetree.client.permission.getRequiredPermissions
 import com.kartollika.secretpinetree.client.ui_kit.theme.SecretPineTreeClientTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -64,8 +57,11 @@ class MainActivity : ComponentActivity() {
           val permissionsLauncher =
             rememberMultiplePermissionsState(permissions = getRequiredPermissions())
 
-          if (permissionsLauncher.allPermissionsGranted) {
-            val viewModel: MessengerViewModel = hiltViewModel()
+          val viewModel: MessengerViewModel = hiltViewModel()
+          val locationEnabled = viewModel.locationEnabled()
+          var locationEnabledState = remember { mutableStateOf(locationEnabled && permissionsLauncher.allPermissionsGranted) }
+
+          if (locationEnabledState.value) {
             val state by viewModel.uiState.collectAsState()
             val lookingForPineState by viewModel.lookingForPineState.collectAsState()
 
@@ -98,36 +94,12 @@ class MainActivity : ComponentActivity() {
           } else {
             PermissionRationale(
               modifier = Modifier.fillMaxSize(),
-              permissionLauncher = permissionsLauncher
+              locationEnabled = viewModel::locationEnabled,
+              locationEnabledState = locationEnabledState
             )
           }
         }
       }
-    }
-  }
-
-  companion object {
-    private fun getRequiredPermissions(): List<String> {
-      val newAndroidRequired = if (VERSION.SDK_INT >= VERSION_CODES.S) {
-        listOf(
-          permission.BLUETOOTH_ADVERTISE,
-          permission.BLUETOOTH_CONNECT,
-          permission.BLUETOOTH_SCAN
-        )
-      } else {
-        emptyList()
-      }.toTypedArray()
-
-      return listOf(
-        permission.BLUETOOTH,
-        permission.BLUETOOTH_ADMIN,
-        permission.ACCESS_WIFI_STATE,
-        permission.CHANGE_WIFI_STATE,
-        permission.ACCESS_COARSE_LOCATION,
-        permission.ACCESS_FINE_LOCATION,
-        permission.READ_EXTERNAL_STORAGE,
-        *newAndroidRequired
-      )
     }
   }
 }
