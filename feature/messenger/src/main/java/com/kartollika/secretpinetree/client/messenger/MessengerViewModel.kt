@@ -4,11 +4,14 @@ import android.location.LocationManager
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.ConnectionInfo
 import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback
 import com.google.android.gms.nearby.connection.ConnectionResolution
 import com.google.android.gms.nearby.connection.ConnectionsClient
 import com.google.android.gms.nearby.connection.ConnectionsStatusCodes
+import com.google.android.gms.nearby.connection.ConnectionsStatusCodes.STATUS_ALREADY_CONNECTED_TO_ENDPOINT
 import com.google.android.gms.nearby.connection.DiscoveredEndpointInfo
 import com.google.android.gms.nearby.connection.DiscoveryOptions
 import com.google.android.gms.nearby.connection.EndpointDiscoveryCallback
@@ -59,7 +62,13 @@ class MessengerViewModel @Inject constructor(
   val uiState = combine(
     messengerRepository.getName(),
     messengerRepository.getMessages().map { it.map(messageVOMapper::mapMessageToVO) },
-  ) { name, messages ->
+    lookingForPineState,
+  ) { name, messages, lookingForPine ->
+    val endpointName = if (lookingForPine is Connected) {
+      lookingForPine.endpointName
+    } else {
+      endpointName
+    }
     Messenger(name, messages, endpointName)
   }
     .stateIn(
@@ -95,12 +104,19 @@ class MessengerViewModel @Inject constructor(
   }
 
   fun connect(endpointId: String) {
+    val endpointName = endpointName
     _lookingForPineState.tryEmit(Connecting)
     viewModelScope.launch(Dispatchers.Default) {
       connectionsClient
         .requestConnection("Android Phone", endpointId, connectionLifecycleCallback)
         .addOnSuccessListener { unused: Void? -> }
-        .addOnFailureListener { e: Exception? -> }
+        .addOnFailureListener { e: Exception? ->
+          if ((e as ApiException).statusCode == STATUS_ALREADY_CONNECTED_TO_ENDPOINT) {
+            _lookingForPineState.tryEmit(Connected(endpointName))
+            return@addOnFailureListener
+          }
+          _lookingForPineState.tryEmit(LookingForPine.Loading)
+        }
     }
   }
 
