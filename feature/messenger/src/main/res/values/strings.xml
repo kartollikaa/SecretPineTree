@@ -11,4 +11,5 @@
   <string name="save">Сохранить</string>
   <string name="send_message">Отправить</string>
   <string name="load_more">Загрузить еще</string>
+  <string name="accessibility_slide_to_bottom">Вниз</string>
 </resources>
