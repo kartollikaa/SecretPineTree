@@ -1,5 +1,6 @@
 package com.kartollika.secretpinetree.server.data.dao
 
+import androidx.annotation.Keep
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy

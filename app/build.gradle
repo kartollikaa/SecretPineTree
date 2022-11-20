@@ -33,7 +33,7 @@ android {
   buildTypes {
     release {
       signingConfig signingConfigs.release
-      minifyEnabled false
+      minifyEnabled true
       proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
     }
   }
@@ -84,4 +84,5 @@ dependencies {
 
   implementation project(":client")
   implementation project(":server")
+  implementation project(":domain")
 }

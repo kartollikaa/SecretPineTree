@@ -22,3 +22,6 @@
 
 # Keep `Companion` object fields of serializable classes.
 # This avoids serializer lookup through `getDeclaredClasses` as done for named companion objects.
+
+-keep class com.kartollika.secretpinetree.domain.model.** { *; }
+-keep class com.kartollika.secretpinetree.server.data.entity.** { *; }
